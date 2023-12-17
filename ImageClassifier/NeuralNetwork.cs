@@ -22,10 +22,11 @@ namespace ImageClassifier
             biasesOutput = Matrix<double>.Build.Random(1, outputSize);
         }
 
+        Matrix<double> temp;
         public double Train(Matrix<double> xBatch, Matrix<double> yBatchNonOneHot, double learningRate) 
         {
             // forward propagation
-
+            temp = xBatch;
             var hiddenLayerInput = xBatch * weightsInputHidden + biasesHidden;
             var hiddenLayerOutput = Sigmoid(hiddenLayerInput);
             var outputLayerInput = hiddenLayerOutput * weightsOutputHidden + biasesOutput;
@@ -62,7 +63,7 @@ namespace ImageClassifier
             var correct = 0;
             for(int i = 0; i < yTest.RowCount; i++)
             {
-                var actual = yTest.Row(i).MaximumIndex();
+                int actual = Convert.ToInt32(yTest[i, 0]);
                 var predicted = predictions.Row(i).MaximumIndex();
 
                 if(actual == predicted)
@@ -85,6 +86,20 @@ namespace ImageClassifier
             var outputLayerOutput = Softmax(outputLayerInput); 
             return outputLayerOutput;
         }
+
+        public int PredictNumber(Matrix<double> xTest)
+        {
+            var extendedBiasesHidden = Matrix<double>.Build.DenseOfRowVectors(Enumerable.Repeat(biasesHidden.Row(0), xTest.RowCount));
+
+            var hiddenLayerInput = (xTest * weightsInputHidden) + extendedBiasesHidden;
+            var hiddenLayerOutput = Sigmoid(hiddenLayerInput);
+
+            var extendedBiasesOutput = Matrix<double>.Build.DenseOfRowVectors(Enumerable.Repeat(biasesOutput.Row(0), xTest.RowCount));
+
+            var outputLayerInput = hiddenLayerOutput * weightsOutputHidden + extendedBiasesOutput;
+            return outputLayerInput.Row(0).MaximumIndex();
+        }
+
         private double CrossEntropyLoss(Matrix<double> predicted, Matrix<double> actual)
         {
             int numRows = predicted.RowCount;

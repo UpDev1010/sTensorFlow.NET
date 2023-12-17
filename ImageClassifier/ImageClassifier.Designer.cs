@@ -32,6 +32,7 @@
             this.BtnAnalyzeEmotion = new System.Windows.Forms.Button();
             this.BtnSelectImageFile = new System.Windows.Forms.Button();
             this.BtnTrain = new System.Windows.Forms.Button();
+            this.RtbLog = new System.Windows.Forms.RichTextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -75,11 +76,21 @@
             this.BtnTrain.UseVisualStyleBackColor = true;
             this.BtnTrain.Click += new System.EventHandler(this.BtnTrain_Click);
             // 
+            // RtbLog
+            // 
+            this.RtbLog.Location = new System.Drawing.Point(417, 219);
+            this.RtbLog.Name = "RtbLog";
+            this.RtbLog.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.None;
+            this.RtbLog.Size = new System.Drawing.Size(367, 218);
+            this.RtbLog.TabIndex = 4;
+            this.RtbLog.Text = "";
+            // 
             // ImageClassifier
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.RtbLog);
             this.Controls.Add(this.BtnTrain);
             this.Controls.Add(this.BtnSelectImageFile);
             this.Controls.Add(this.BtnAnalyzeEmotion);
@@ -97,6 +108,7 @@
         private System.Windows.Forms.Button BtnAnalyzeEmotion;
         private System.Windows.Forms.Button BtnSelectImageFile;
         private System.Windows.Forms.Button BtnTrain;
+        private System.Windows.Forms.RichTextBox RtbLog;
     }
 }
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,13 +17,73 @@ namespace ImageClassifier
     public partial class ImageClassifier : Form
     {
         string ImageFilePath;
+        NeuralNetwork NNModel;
         public ImageClassifier()
         {
             InitializeComponent();
         }
+        static Matrix<double> ImageToDoubleArray(string imagePath)
+        {
+            using (var bitmap = new Bitmap(imagePath))
+            {
+                int width = bitmap.Width;
+                int height = bitmap.Height;
+
+                double[,] pixelValues = new double[1, height * width];
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        System.Drawing.Color pixelColor = bitmap.GetPixel(x, y);
+
+                        pixelValues[0, y * width + x] = pixelColor.B / 255.0;
+                    }
+                }
+
+                var m = Matrix<double>.Build.DenseOfArray(pixelValues);
+                return m;
+            }
+        }
+
+        static void ResizeImage(string inputPath, string outputPath, int newWidth, int newHeight)
+        {
+            using (var originalImage = Image.FromFile(inputPath))
+            {
+                using (var resizedImage = new Bitmap(newWidth, newHeight))
+                {
+                    using (var graphics = Graphics.FromImage(resizedImage))
+                    {
+                        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                        graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                        graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+
+                        graphics.DrawImage(originalImage, 0, 0, newWidth, newHeight);
+                    }
+
+                    // Save the resized image
+                    resizedImage.Save(outputPath, originalImage.RawFormat);
+                }
+            }
+        }
+
+        public void Log(string str)
+        {
+            RtbLog.Text += str;
+        }
 
         private void BtnAnalyzeEmotion_Click(object sender, EventArgs e)
         {
+            string outImagePath = Path.Combine(Path.GetDirectoryName(ImageFilePath), Path.GetFileNameWithoutExtension(ImageFilePath) + "_28_28" + Path.GetExtension(ImageFilePath));
+            if (File.Exists(outImagePath))
+                File.Delete(outImagePath);
+
+            //ResizeImage(ImageFilePath, outImagePath, 28, 28);
+
+            var data = ImageToDoubleArray(ImageFilePath);
+            int result = NNModel.PredictNumber(data);
+            Log(result.ToString());
         }
 
         private void BtnSelectImageFile_Click(object sender, EventArgs e)
@@ -43,9 +104,9 @@ namespace ImageClassifier
 
             var (xTrain, yTrain) = LoadAndPreprocessData("train.csv");
             var (xTest, yTest) = LoadAndPreprocessData("test.csv");
-            var model = new NeuralNetwork(inputSize, hiddenSize, outputSize);
+            NNModel = new NeuralNetwork(inputSize, hiddenSize, outputSize);
 
-            int epochs = 5;
+            int epochs = 3;
             double learningRate = 0.001;
             int batchSize = 1;
             for (int epoch = 0; epoch < epochs; epoch++)
@@ -55,12 +116,12 @@ namespace ImageClassifier
                     var xBatch = xTrain.SubMatrix(batchStart, batchSize, 0, inputSize);
                     var yBatch = yTrain.SubMatrix(batchStart, batchSize, 0, 1);
 
-                    var loss = model.Train(xBatch, yBatch, learningRate);
+                    var loss = NNModel.Train(xBatch, yBatch, learningRate);
                     Console.WriteLine($"Epoch {epoch + 1}, Loss : {loss}");
                 }
             }
 
-            double testAccurcy = model.Evaluate(xTest, yTest);
+            double testAccurcy = NNModel.Evaluate(xTest, yTest);
             Console.WriteLine($"Test Accuracy is {testAccurcy * 100}%");
 
         }
@@ -73,7 +134,7 @@ namespace ImageClassifier
 
             var xData = data.SubMatrix(0, data.RowCount, outputSize, inputSize);
             var yData = data.SubMatrix(0, data.RowCount, 0, outputSize);
-            return (xData / 255.0, yData / 255.0);
+            return (xData / 255.0, yData);
         }
     }
 }

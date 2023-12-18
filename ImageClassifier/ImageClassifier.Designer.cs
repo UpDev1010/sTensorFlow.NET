@@ -33,6 +33,8 @@
             this.BtnSelectImageFile = new System.Windows.Forms.Button();
             this.BtnTrain = new System.Windows.Forms.Button();
             this.RtbLog = new System.Windows.Forms.RichTextBox();
+            this.BtnSaveModel = new System.Windows.Forms.Button();
+            this.BtnLoadModel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -48,7 +50,7 @@
             // 
             // BtnAnalyzeEmotion
             // 
-            this.BtnAnalyzeEmotion.Location = new System.Drawing.Point(425, 88);
+            this.BtnAnalyzeEmotion.Location = new System.Drawing.Point(425, 162);
             this.BtnAnalyzeEmotion.Name = "BtnAnalyzeEmotion";
             this.BtnAnalyzeEmotion.Size = new System.Drawing.Size(95, 28);
             this.BtnAnalyzeEmotion.TabIndex = 1;
@@ -58,7 +60,7 @@
             // 
             // BtnSelectImageFile
             // 
-            this.BtnSelectImageFile.Location = new System.Drawing.Point(425, 54);
+            this.BtnSelectImageFile.Location = new System.Drawing.Point(425, 124);
             this.BtnSelectImageFile.Name = "BtnSelectImageFile";
             this.BtnSelectImageFile.Size = new System.Drawing.Size(95, 28);
             this.BtnSelectImageFile.TabIndex = 2;
@@ -68,7 +70,7 @@
             // 
             // BtnTrain
             // 
-            this.BtnTrain.Location = new System.Drawing.Point(425, 12);
+            this.BtnTrain.Location = new System.Drawing.Point(425, 48);
             this.BtnTrain.Name = "BtnTrain";
             this.BtnTrain.Size = new System.Drawing.Size(95, 28);
             this.BtnTrain.TabIndex = 3;
@@ -84,12 +86,35 @@
             this.RtbLog.Size = new System.Drawing.Size(367, 218);
             this.RtbLog.TabIndex = 4;
             this.RtbLog.Text = "";
+            this.RtbLog.TextChanged += new System.EventHandler(this.RtbLog_TextChanged);
+            // 
+            // BtnSaveModel
+            // 
+            this.BtnSaveModel.Location = new System.Drawing.Point(425, 85);
+            this.BtnSaveModel.Name = "BtnSaveModel";
+            this.BtnSaveModel.Size = new System.Drawing.Size(95, 28);
+            this.BtnSaveModel.TabIndex = 5;
+            this.BtnSaveModel.Text = "Save Model";
+            this.BtnSaveModel.UseVisualStyleBackColor = true;
+            this.BtnSaveModel.Click += new System.EventHandler(this.BtnSaveModel_Click);
+            // 
+            // BtnLoadModel
+            // 
+            this.BtnLoadModel.Location = new System.Drawing.Point(425, 12);
+            this.BtnLoadModel.Name = "BtnLoadModel";
+            this.BtnLoadModel.Size = new System.Drawing.Size(95, 28);
+            this.BtnLoadModel.TabIndex = 6;
+            this.BtnLoadModel.Text = "Load Model";
+            this.BtnLoadModel.UseVisualStyleBackColor = true;
+            this.BtnLoadModel.Click += new System.EventHandler(this.BtnLoadModel_Click);
             // 
             // ImageClassifier
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.BtnLoadModel);
+            this.Controls.Add(this.BtnSaveModel);
             this.Controls.Add(this.RtbLog);
             this.Controls.Add(this.BtnTrain);
             this.Controls.Add(this.BtnSelectImageFile);
@@ -109,6 +134,8 @@
         private System.Windows.Forms.Button BtnSelectImageFile;
         private System.Windows.Forms.Button BtnTrain;
         private System.Windows.Forms.RichTextBox RtbLog;
+        private System.Windows.Forms.Button BtnSaveModel;
+        private System.Windows.Forms.Button BtnLoadModel;
     }
 }
 

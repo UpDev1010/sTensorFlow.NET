@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MathNet.Numerics.LinearAlgebra;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ImageClassifier
 {
@@ -22,11 +25,78 @@ namespace ImageClassifier
             biasesOutput = Matrix<double>.Build.Random(1, outputSize);
         }
 
-        Matrix<double> temp;
-        public double Train(Matrix<double> xBatch, Matrix<double> yBatchNonOneHot, double learningRate) 
+        public void Save(string folderPath)
         {
-            // forward propagation
-            temp = xBatch;
+            //Newtonsoft.Json.JsonSerializer serializer = new Newtonsoft.Json.JsonSerializer();
+            //serializer.Converters.Add(new Newtonsoft.Json.Converters.JavaScriptDateTimeConverter());
+            //serializer.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+            //serializer.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Auto;
+            //serializer.Formatting = Newtonsoft.Json.Formatting.Indented;
+
+            Directory.CreateDirectory(folderPath);
+            string wIHPath = Path.Combine(folderPath, "wIH.bin");
+            string bIHPath = Path.Combine(folderPath, "bIH.bin");
+            string wOHPath = Path.Combine(folderPath, "wOH.bin");
+            string bOHPath = Path.Combine(folderPath, "bOH.bin");
+
+            if (File.Exists(wIHPath)) File.Delete(wIHPath);
+            if (File.Exists(bIHPath)) File.Delete(bIHPath);
+            if (File.Exists(wOHPath)) File.Delete(wOHPath);
+            if (File.Exists(bOHPath)) File.Delete(bOHPath);
+
+            //using (StreamWriter sw = new StreamWriter(wIHPath))
+            //using (Newtonsoft.Json.JsonWriter writer = new Newtonsoft.Json.JsonTextWriter(sw))
+            //{
+            //    serializer.Serialize(writer, weightsInputHidden, typeof(Matrix<double>));
+            //}
+            //using (StreamWriter sw = new StreamWriter(bIHPath))
+            //using (Newtonsoft.Json.JsonWriter writer = new Newtonsoft.Json.JsonTextWriter(sw))
+            //{
+            //    serializer.Serialize(writer, biasesHidden, typeof(Matrix<double>));
+            //}
+            //using (StreamWriter sw = new StreamWriter(wOHPath))
+            //using (Newtonsoft.Json.JsonWriter writer = new Newtonsoft.Json.JsonTextWriter(sw))
+            //{
+            //    serializer.Serialize(writer, weightsOutputHidden, typeof(Matrix<double>));
+            //}
+            //using (StreamWriter sw = new StreamWriter(bOHPath))
+            //using (Newtonsoft.Json.JsonWriter writer = new Newtonsoft.Json.JsonTextWriter(sw))
+            //{
+            //    serializer.Serialize(writer, biasesOutput, typeof(Matrix<double>));
+            //}
+
+            File.WriteAllText(wIHPath, JsonConvert.SerializeObject(weightsInputHidden.ToArray()));
+            File.WriteAllText(bIHPath, JsonConvert.SerializeObject(biasesHidden.ToArray()));
+            File.WriteAllText(wOHPath, JsonConvert.SerializeObject(weightsOutputHidden.ToArray()));
+            File.WriteAllText(bOHPath, JsonConvert.SerializeObject(biasesOutput.ToArray()));
+        }
+
+        public bool Load(string folderPath)
+        {
+            if (!Directory.Exists(folderPath))
+                return false;
+            var settings = new JsonSerializerSettings { Converters = new List<JsonConverter> { new MatrixJsonConverter<double>() } };
+
+            string wIHPath = Path.Combine(folderPath, "wIH.bin");
+            string bIHPath = Path.Combine(folderPath, "bIH.bin");
+            string wOHPath = Path.Combine(folderPath, "wOH.bin");
+            string bOHPath = Path.Combine(folderPath, "bOH.bin");
+
+            if (!File.Exists(bIHPath)) return false;
+            if (!File.Exists(wOHPath)) return false;
+            if (!File.Exists(bOHPath)) return false;
+            if (!File.Exists(wIHPath)) return false;
+
+            weightsInputHidden = JsonConvert.DeserializeObject<Matrix<double>>(File.ReadAllText(wIHPath), settings);
+            biasesHidden = JsonConvert.DeserializeObject<Matrix<double>>(File.ReadAllText(bIHPath), settings);
+            weightsOutputHidden = JsonConvert.DeserializeObject<Matrix<double>>(File.ReadAllText(wOHPath), settings);
+            biasesOutput = JsonConvert.DeserializeObject<Matrix<double>>(File.ReadAllText(bOHPath), settings);
+
+            return true;
+        }
+
+        public double Train(Matrix<double> xBatch, Matrix<double> yBatchNonOneHot, double learningRate)
+        {
             var hiddenLayerInput = xBatch * weightsInputHidden + biasesHidden;
             var hiddenLayerOutput = Sigmoid(hiddenLayerInput);
             var outputLayerInput = hiddenLayerOutput * weightsOutputHidden + biasesOutput;
@@ -40,7 +110,7 @@ namespace ImageClassifier
             var outputDelta = outputLayerOutput - yBatch; // a2 - y
 
             var tt = (outputDelta * weightsOutputHidden.Transpose());
-            var hiddenDelta = tt.PointwiseMultiply(hiddenLayerOutput).PointwiseMultiply(1-hiddenLayerOutput);
+            var hiddenDelta = tt.PointwiseMultiply(hiddenLayerOutput).PointwiseMultiply(1 - hiddenLayerOutput);
 
             weightsOutputHidden -= hiddenLayerOutput.Transpose() * outputDelta * learningRate;
             biasesOutput -= outputDelta * learningRate;
@@ -61,12 +131,12 @@ namespace ImageClassifier
         {
             var predictions = Predict(xTest);
             var correct = 0;
-            for(int i = 0; i < yTest.RowCount; i++)
+            for (int i = 0; i < yTest.RowCount; i++)
             {
                 int actual = Convert.ToInt32(yTest[i, 0]);
                 var predicted = predictions.Row(i).MaximumIndex();
 
-                if(actual == predicted)
+                if (actual == predicted)
                     correct++;
             }
 
@@ -83,7 +153,7 @@ namespace ImageClassifier
             var extendedBiasesOutput = Matrix<double>.Build.DenseOfRowVectors(Enumerable.Repeat(biasesOutput.Row(0), xTest.RowCount));
 
             var outputLayerInput = hiddenLayerOutput * weightsOutputHidden + extendedBiasesOutput;
-            var outputLayerOutput = Softmax(outputLayerInput); 
+            var outputLayerOutput = Softmax(outputLayerInput);
             return outputLayerOutput;
         }
 
@@ -143,6 +213,27 @@ namespace ImageClassifier
             var softmaxProbabilities = expLogits / sumExpLogits;
 
             return softmaxProbabilities;
+        }
+    }
+
+    public class MatrixJsonConverter<T> : JsonConverter where T : struct, IEquatable<T>, IFormattable
+    {
+        public override bool CanConvert(Type objectType)
+        {
+            return typeof(Matrix<T>).IsAssignableFrom(objectType);
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            JArray array = JArray.Load(reader);
+            T[,] matrixData = array.ToObject<T[,]>();
+            return Matrix<T>.Build.DenseOfArray(matrixData);
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var matrix = (Matrix<T>)value;
+            serializer.Serialize(writer, matrix.ToArray());
         }
     }
 }

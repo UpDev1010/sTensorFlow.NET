@@ -16,11 +16,18 @@ namespace ImageClassifier
 {
     public partial class ImageClassifier : Form
     {
+        private string ModelFolderPath = Path.GetDirectoryName(Application.ExecutablePath) +  "/model";
         string ImageFilePath;
         NeuralNetwork NNModel;
+        int inputSize = 28 * 28;
+        int hiddenSize = 128;
+        int outputSize = 10;
+
         public ImageClassifier()
         {
             InitializeComponent();
+
+            NNModel = new NeuralNetwork(inputSize, hiddenSize, outputSize);
         }
         static Matrix<double> ImageToDoubleArray(string imagePath)
         {
@@ -70,7 +77,7 @@ namespace ImageClassifier
 
         public void Log(string str)
         {
-            RtbLog.Text += str;
+            RtbLog.Text += str + System.Environment.NewLine;
         }
 
         private void BtnAnalyzeEmotion_Click(object sender, EventArgs e)
@@ -98,16 +105,11 @@ namespace ImageClassifier
 
         private void BtnTrain_Click(object sender, EventArgs e)
         {
-            int inputSize = 28 * 28;
-            int hiddenSize = 128;
-            int outputSize = 10;
-
             var (xTrain, yTrain) = LoadAndPreprocessData("train.csv");
             var (xTest, yTest) = LoadAndPreprocessData("test.csv");
-            NNModel = new NeuralNetwork(inputSize, hiddenSize, outputSize);
 
-            int epochs = 3;
-            double learningRate = 0.001;
+            int epochs = 5;
+            double learningRate = 0.01;
             int batchSize = 1;
             for (int epoch = 0; epoch < epochs; epoch++)
             {
@@ -122,7 +124,8 @@ namespace ImageClassifier
             }
 
             double testAccurcy = NNModel.Evaluate(xTest, yTest);
-            Console.WriteLine($"Test Accuracy is {testAccurcy * 100}%");
+            Log($"Test Accuracy is {testAccurcy * 100}%");
+            Log("model train is finished");
 
         }
 
@@ -135,6 +138,29 @@ namespace ImageClassifier
             var xData = data.SubMatrix(0, data.RowCount, outputSize, inputSize);
             var yData = data.SubMatrix(0, data.RowCount, 0, outputSize);
             return (xData / 255.0, yData);
+        }
+
+        private void RtbLog_TextChanged(object sender, EventArgs e)
+        {
+            RtbLog.SelectionStart = RtbLog.Text.Length;
+            RtbLog.ScrollToCaret();
+        }
+
+        private void BtnSaveModel_Click(object sender, EventArgs e)
+        {
+            NNModel.Save(ModelFolderPath);
+            Log("model save success.");
+        }
+
+        private void BtnLoadModel_Click(object sender, EventArgs e)
+        {
+            if(NNModel.Load(ModelFolderPath))
+            {
+                Log("load success.");
+                return;
+            }
+
+            Log("load failed.");
         }
     }
 }

@@ -35,6 +35,7 @@
             this.RtbLog = new System.Windows.Forms.RichTextBox();
             this.BtnSaveModel = new System.Windows.Forms.Button();
             this.BtnLoadModel = new System.Windows.Forms.Button();
+            this.BtnEvalModel = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbImage)).BeginInit();
             this.SuspendLayout();
             // 
@@ -50,7 +51,7 @@
             // 
             // BtnAnalyzeEmotion
             // 
-            this.BtnAnalyzeEmotion.Location = new System.Drawing.Point(425, 162);
+            this.BtnAnalyzeEmotion.Location = new System.Drawing.Point(425, 179);
             this.BtnAnalyzeEmotion.Name = "BtnAnalyzeEmotion";
             this.BtnAnalyzeEmotion.Size = new System.Drawing.Size(95, 28);
             this.BtnAnalyzeEmotion.TabIndex = 1;
@@ -60,7 +61,7 @@
             // 
             // BtnSelectImageFile
             // 
-            this.BtnSelectImageFile.Location = new System.Drawing.Point(425, 124);
+            this.BtnSelectImageFile.Location = new System.Drawing.Point(425, 145);
             this.BtnSelectImageFile.Name = "BtnSelectImageFile";
             this.BtnSelectImageFile.Size = new System.Drawing.Size(95, 28);
             this.BtnSelectImageFile.TabIndex = 2;
@@ -90,7 +91,7 @@
             // 
             // BtnSaveModel
             // 
-            this.BtnSaveModel.Location = new System.Drawing.Point(425, 85);
+            this.BtnSaveModel.Location = new System.Drawing.Point(425, 113);
             this.BtnSaveModel.Name = "BtnSaveModel";
             this.BtnSaveModel.Size = new System.Drawing.Size(95, 28);
             this.BtnSaveModel.TabIndex = 5;
@@ -108,11 +109,22 @@
             this.BtnLoadModel.UseVisualStyleBackColor = true;
             this.BtnLoadModel.Click += new System.EventHandler(this.BtnLoadModel_Click);
             // 
+            // BtnEvalModel
+            // 
+            this.BtnEvalModel.Location = new System.Drawing.Point(425, 81);
+            this.BtnEvalModel.Name = "BtnEvalModel";
+            this.BtnEvalModel.Size = new System.Drawing.Size(95, 28);
+            this.BtnEvalModel.TabIndex = 7;
+            this.BtnEvalModel.Text = "Evaluate Model";
+            this.BtnEvalModel.UseVisualStyleBackColor = true;
+            this.BtnEvalModel.Click += new System.EventHandler(this.BtnEvalModel_Click);
+            // 
             // ImageClassifier
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.BtnEvalModel);
             this.Controls.Add(this.BtnLoadModel);
             this.Controls.Add(this.BtnSaveModel);
             this.Controls.Add(this.RtbLog);
@@ -136,6 +148,7 @@
         private System.Windows.Forms.RichTextBox RtbLog;
         private System.Windows.Forms.Button BtnSaveModel;
         private System.Windows.Forms.Button BtnLoadModel;
+        private System.Windows.Forms.Button BtnEvalModel;
     }
 }
 
